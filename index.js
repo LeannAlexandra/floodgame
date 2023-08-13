@@ -88,6 +88,16 @@ function addToTerritory(coordinates=startingPosition, colorVal = grid[ startingP
     //add
 //done
 }
+function inPlayerTerritory(tileID)
+{
+    const x=Number(tileID.substring(4, tileID.indexOf('-')));
+    const y=Number(tileID.substring(tileID.indexOf('-')+1)); 
+    for (const point of playerTerritory) {
+        if(point[0]===x &&point[1]===y)
+            return true;
+    }
+    return false;
+}
 //function devTerritory(){}
 
 function testNorth(tileID, value){
@@ -207,7 +217,7 @@ function adjacentToPlayerTerritory(tileID){
     if(testNorth(tileID, playerTerritory))
     {
         /* add likemindeds
-        
+
         */
          return true;
     
@@ -298,7 +308,11 @@ function updateToScreen(grid)
             tile.addEventListener("mouseover", (event)=>{
                 //console.log(event.target);
                 
-               if(adjacentToPlayerTerritory(event.target.id)) {event.target.classList.add("grow"); 
+               if(adjacentToPlayerTerritory(event.target.id)&& !inPlayerTerritory(event.target.id) ) 
+               {
+                
+                event.target.classList.add("grow"); 
+            
             
             }
                 const highlightColor = event.target.getAttribute("value");
@@ -309,10 +323,38 @@ function updateToScreen(grid)
                 for (const t of highlightedTiles) {
                     //test if close so user square
                    // console.log(`ev.target.id= ${target.event.id}  t.id: ${t.id}`)
-                    if(adjacentToPlayerTerritory(t.id))
+                    if(adjacentToPlayerTerritory(t.id) && !inPlayerTerritory(t.id) ){
                         t.classList.add("highlight");
+///TODO: ---------------                        //add neighbors of same coloretc.
+                    }
                     //t.setAttribute("style","Filter: Glow(Color=#00FF00, Strength=20)");
                 }
+
+                //event.toElement
+            });
+            tile.addEventListener("click", (event)=>{
+
+                ///TODO PLAY SQUISH SOUND
+
+                const play = event.target.getAttribute("value");
+                //console.log(event.target.getAttribute("value"));
+                const highlightedTiles=document.getElementsByClassName(`c${grid[x][y]}`);
+                
+          
+                for (const t of highlightedTiles) {
+                    //test if close so user square
+                   // console.log(`ev.target.id= ${target.event.id}  t.id: ${t.id}`)
+                    if(adjacentToPlayerTerritory(t.id)){
+                        let x=Number(t.id.substring(4, t.id.indexOf('-')));
+                        let y=Number(t.id.substring(t.id.indexOf('-')+1)); 
+                        let point =[x,y];
+                        addToTerritory(point);
+                        //t.classList.add("highlight");
+///TODO: ---------------                        //add neighbors of same coloretc.
+                    }
+                    //t.setAttribute("style","Filter: Glow(Color=#00FF00, Strength=20)");
+                }
+                //updateScreen();
 
                 //event.toElement
             });
