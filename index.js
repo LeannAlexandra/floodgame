@@ -1,90 +1,188 @@
 const game= document.getElementById("flood-game");
 document.getElementById("date").innerHTML= `&copy ${new Date().getFullYear()}`;
+game.addEventListener('mouseleave', ()=>{
+    const remC1=document.getElementsByClassName("grow");
+    const remC2=document.getElementsByClassName("highlight");
+    for (const t of remC1) { 
+            t.classList.remove("grow");
+     }
+     for (const t of remC2) { 
+        t.classList.remove("highlight");
+    }
+});
 
-let width=16;
-let height=16;
+
+let width=16;   //if width > height, adds empty rows. 
+let height=16; //if the height is less than width -> problem?
 let depth=7;
-const dev=true;
+//const dev=true;
 
-  let startingPosition =[0,0];
+
+let steps=[];
+let stepCount =-1;// the first move is grid initialising the player's base.
+
+let startingPosition =[0,0];
 
 //private: 
 let grid=[];
 let colors=[{}];
 let playerTerritory=[];//use player territory for testing and recursions. 
 let base=[];// use base for painting
+const uiStepDelay=50;//milliseconds
+// const totalAnimationTime=2000;/*  */
 
 createColors(depth);
 createGame(0);//time seed in the future - so that every refresh of the page make a new version.
+consoleGrid();
 updateToScreen(grid);
-addToTerritory(startingPosition, grid[ startingPosition[0] ][ startingPosition[1] ] );
-
-function play(value){
-    //upate territory to new value
-    for (const k of playerTerritory){
-        const tile =document.getElementById(`tile${k[0]}-${k[1]}`);
-        tile.classList.remove(`c${grid[k[0]][k[1]]}`);
-        grid[k[0]][k[1]] = value;   
-        tile.classList.add(`c${value}`);
-        tile.setAttribute("value",value) //a=grid[x][y];
-        tile.style.backgroundColor=`hsl(${colors[value].degree},${colors[value].saturation},${colors[value].lightness})`;
+//playValue();
+playValue(grid[startingPosition[0]][startingPosition[1]]);// initialise the game.
+//addToTerritory(startingPosition, grid[ startingPosition[0] ][ startingPosition[1] ] );
+function consoleGrid(){
+    for (let y = 0; y < height; y++) {
+        let line="";
+        for (let x = 0; x < width; x++) {
+            line+=`${grid[x][y]}  `;
+        }
+        console.log(line);
     }
-    
-   // if (adjacentToPlayerTerritory )
-     
-   //they get added in the onclick function using class.  addToTerritory(coordinates=startingPosition, value);
-
-    
+    console.log("\n");
 }
 
 
+function playValue(value){
+
+    value=Number(value);
+    if (!value){
+       /////////---> debug showWinAnimation();
+        return;
+    }
+    stepCount++;
+     console.log("THE PLAY VALUE FOR STEP "+stepCount+" is: "+ value);
+    
+    
+    document.documentElement.style.setProperty('--clr-base', colors[value]);
+    if(!base){
+        addToTerritory([startingPosition[0],startingPosition[1]])
+    }
+
+    for (const k of base) {
+        //console.log('base: '+ k +`it illiterally is: ${k[0]}-${k[1]} `);
+        const tile =document.getElementById(`tile${k[0]}-${k[1]}`);
+        //console.log(`CONST TILE =: ${tile} `);
+       
+       // console.log(`removed the old c value class of `);
+        grid[k[0]][k[1]] = value;   
+        tile.classList.add(`base`);
+        tile.setAttribute("value",value) //a=grid[x][y];
+        setTimeout(()=>{
+            tile.style.backgroundColor=colors[value];
+        },uiStepDelay*(k[0]+k[1]));
+       
+    }
+    for (const k of playerTerritory)
+    {
+        console.log(`k of playerterritory: ${k} illiterary values are: ${k[0]},${k[1]}`);
+        console.log(`test South: ${testSouth(id(k),grid[k[0]][k[1]])} && southTile(id(k)).classList.contains("base")? ${southTile(id(k)).classList.contains("base")} `);
+        if(testNorth(id(k)) && !northTile(id(k)).classList.contains("base")){
+            addToTerritory(  [k[0],k[1]-1]   );
+        }
+        if( testEast(id(k)) && !eastTile(id(k)).classList.contains("base")){
+            addToTerritory([k[0]+1,k[1]]);
+        }
+        if(  testSouth(id(k)) && !southTile(id(k)).classList.contains("base") ){
+            addToTerritory([k[0],k[1]+1]);
+        }
+        if( testWest(id(k)) && !westTile(id(k)).classList.contains("base")){
+            addToTerritory([k[0]-1,k[1]]);
+        }
+        
+        
+    }
+    //assesWin if base.size() === width*height -> win
+    //else
+    assessTerritory();//cleanout unnecessary points in the cutting edge.
+    consoleGrid();
+
+}
+
+function showWinAnimation()
+{   
+    /*show everything bla bla:*/
+    createGame();// creates a new grid. 
+    for (let y=0;y<height;y++){
+        for(let x=0;x<width;x++){
+            
+            setTimeout(() => {
+                const tile =document.getElementById(`tile${x}-${y}`);
+                tile.classList.remove(`c${grid[x][y]}`);
+                tile.classList.remove("highlight");
+                tile.classList.remove("grow");
+                tile.style.background=" hotpink";
+
+                for(let c=0;c<=depth;c++) // C what I did there? ;>
+                {
+                    if(c==depth){
+                        setTimeout(()=>{
+                            tile.style.backgroundColor=`${colors[grid[x][y]]}`; //the new grid value (Math.floor(Math.random()*depth)+1)
+                        }, uiStepDelay*(uiStepDelay/depth)*c);
+                        break;
+                    } 
+                    setTimeout(()=>{
+                        tile.style.backgroundColor=`${colors[c]}`;
+                    }, uiStepDelay*(uiStepDelay/depth)*c);
+         
+                } //
+            }, ((x+y)*uiStepDelay) );
+        }     
+    }
+}
 function addToTerritory(coordinates=startingPosition, colorVal = grid[ startingPosition[0] ][ startingPosition[1] ]   )
 {
-    //if ()
     let x=coordinates[0];
     let y=coordinates[1];
-   /*  for (const point of playerTerritory) {
-        if(point[0]===x &&point[1]===y)
-            {
-                //point is already in the territory
 
-            }//return true;
-    
-    
-    } */
-    playerTerritory.push(coordinates); //only one point 
-    
-   /* 
-    if(testNorth(`tile${coordinates[0]}-${coordinates[1]}`,colorVal))
-        addToTerritory([x,(y-1)]);
-    //add
-    if(testEast(`tile${coordinates[0]}-${coordinates[1]}`,colorVal))
-        addToTerritory([(x+1),y]);
-    //add
-    if(testSouth(`tile${coordinates[0]}-${coordinates[1]}`,colorVal))
-        addToTerritory([x,(y+1)]);
+    playerTerritory.push(coordinates);
+    base.push(coordinates);
 
-    if(testNorth(`tile${coordinates[0]}-${coordinates[1]}`,colorVal))
-        addToTerritory([(x-1),y]); */
-    //add
-//done
+    tile(id(coordinates)).classList.remove(`c${grid[k[0]][k[1]]}`);
+    tile(id(coordinates)).classList.add("base");
+}
+function assessTerritory(){
+    for (const k of playerTerritory){
+        if(         (testNorth(id(k), grid[k[0]][k[1]]) || k[1]-1<0)   
+                &&  (testEast(id(k), grid[k[0]][k[1]])  || k[0]+1>=width) 
+                &&  (testSouth(id(k),grid[k[0]][k[1]])  || k[1]+1>=height) 
+                &&  (testEast(id(k), grid[k[0]][k[1]])  || k[0]-1>0)  
+                ){
+                    playerTerritory.splice(playerTerritory.indexOf(k));
+                }   
+    }   
 }
 function inPlayerTerritory(tileID)
 {
     const x=Number(tileID.substring(4, tileID.indexOf('-')));
     const y=Number(tileID.substring(tileID.indexOf('-')+1)); 
-    for (const point of playerTerritory) {
+    for (const point of base) {
         if(point[0]===x &&point[1]===y)
             return true;
     }
     return false;
 }
 //function devTerritory(){}
+function id(point){
+    return `tile${point[0]}-${point[1]}`
+}
+function point(id){
+    return [Number(tileID.substring(4, tileID.indexOf('-'))),Number(tileID.substring(tileID.indexOf('-')))];
+}
+function testNorth(tileID, value=grid[startingPosition[0],startingPosition[1]]){
 
-function testNorth(tileID, value){
     const x=Number(tileID.substring(4, tileID.indexOf('-')));
     let y=Number(tileID.substring(tileID.indexOf('-')+1)); 
     value=Number(value); //force cast to number
+    if(!value)
+        return false;
     //console.log (`TileBeingTested: \t${x}\t${y}: with ints because ${x+y}` );
     if(y-1<0)
         return false;//out of bounds.
@@ -94,7 +192,7 @@ function testNorth(tileID, value){
 
 
     if(value === playerTerritory){
-        for (const point of playerTerritory) {
+        for (const point of value) {
             if(point[0]===x &&point[1]===y)
                 return true;
         }
@@ -106,7 +204,7 @@ function testNorth(tileID, value){
     }
     return false;
 }
-function testEast(tileID, value){
+function testEast(tileID, value=grid[startingPosition[0],startingPosition[1]]){
     let x=Number(tileID.substring(4, tileID.indexOf('-')));
     const y=Number(tileID.substring(tileID.indexOf('-')+1)); 
     
@@ -118,7 +216,7 @@ function testEast(tileID, value){
     x+=1;
 
     if(value === playerTerritory){
-        for (const point of playerTerritory) {
+        for (const point of value) {
             if(point[0]===x &&point[1]===y)
                 return true;
         }
@@ -130,7 +228,7 @@ function testEast(tileID, value){
     }
     return false;
 }
-function testSouth(tileID, value){
+function testSouth(tileID, value=grid[startingPosition[0],startingPosition[1]]){
     const x=Number(tileID.substring(4, tileID.indexOf('-')));
     let y=Number(tileID.substring(tileID.indexOf('-')+1)); 
     
@@ -142,7 +240,7 @@ function testSouth(tileID, value){
     y+=1;
 
     if(value === playerTerritory){
-        for (const point of playerTerritory) {
+        for (const point of value) {
             if(point[0]===x &&point[1]===y)
                 return true;
         }
@@ -154,7 +252,7 @@ function testSouth(tileID, value){
     }
     return false;
 }
-function testWest(tileID, value){
+function testWest(tileID, value=grid[startingPosition[0],startingPosition[1]]){
     let x=Number(tileID.substring(4, tileID.indexOf('-')));
     const y=Number(tileID.substring(tileID.indexOf('-')+1));   
     //console.log (`TileBeingTested: \t${x}\t${y}: with ints because ${x+y}` );
@@ -162,7 +260,7 @@ function testWest(tileID, value){
         return false;//out of bounds.
     //adjust offset
     x-=1;
-    if(value === playerTerritory){
+    if(value === base){
         for (const point of playerTerritory) {
             if(point[0]===x &&point[1]===y)
                 return true;
@@ -246,10 +344,13 @@ function adjacentToPlayerTerritory(tileID){
 
 function createGame(seed =1)
 {
-    /* update settings from ui*/
-
-    //then create grid/
+    steps=[];
+    stepCount=-1;
     playerTerritory=[];
+    base =[];
+    //base.push(startingPosition);
+    //playerTerritory.push(startingPosition);
+
     for (let y=0;y<height;y++){
         let values={};
         for(let x= 0;x<width;x++){
@@ -257,15 +358,16 @@ function createGame(seed =1)
       //      consolePreview+=`${values[x]}\t`;
         }
         grid[y]=values;
-        //consolePreview+="\n"
+        
     }
+    
 }
-function createColors(depth=4,saturation="50%",lightness="50%"){
-    const interval=360/depth; 
+function createColors(depth=4,saturation=50,lightness=50){
+    const interval=360/(depth+1); 
     for(let i =0; i<depth;i++)
         {
             let degree =i*interval;
-            colors[i]= {degree ,saturation,lightness}; 
+            colors[i]= `hsl(${i*interval},${saturation}% ,${lightness}%)`; 
 
         }
 }
@@ -289,9 +391,30 @@ function updateTerritoryColor(val){
        tile.setAttribute("value",colorNum) //a=grid[x][y];
         
         //this is the important part
-        tile.style.backgroundColor=`hsl(${colors[colorNum].degree},${colors[colorNum].saturation},${colors[colorNum].lightness})`;
+        tile.style.backgroundColor=colors[colorNum];
     }
 
+}
+function highlightPotentialGain(event){
+    if( !inPlayerTerritory(event.target.id) )       
+    event.target.classList.add("grow"); 
+  else    
+      return; //do nothing if it is in the player territory. 
+
+  //the value of the possible selection by number
+  const highlightColor = event.target.getAttribute("value");
+
+  //limits the highlight only to elements of the same value (the value is added as class "c${highlightColor}")
+  let highlightedTiles=document.getElementsByClassName(`c${highlightColor}`);
+  
+  //test each of these tiles and only add the class "highlight" to those directly adjacent to a player tile - player tiles are stored by coordinates in an integer array playerTerritory[] (it is an array of tiles but stored as points [1,0] of coordinates.)
+  for (const t of highlightedTiles) {
+          
+      //TODO: test if(adjacentToPlayerTerritory(t.id) )
+          t.classList.add("highlight");
+          /*TODO: test all neighbours for same value (if it matches the current tile, do this function for that tile too) recursively, skip player territory*/    
+
+  }
 }
 function updateToScreen(grid)
 {
@@ -311,63 +434,22 @@ function updateToScreen(grid)
             tile.classList.add("tile");
             tile.classList.add(`c${grid[x][y]}`);
             tile.setAttribute("value",grid[x][y]) //a=grid[x][y];
-            tile.style.backgroundColor=`hsl(${colors[grid[x][y]].degree},${colors[grid[x][y]].saturation} ,${colors[grid[x][y]].lightness})`;
+            tile.style.backgroundColor=colors[grid[x][y]];
 
-            tile.addEventListener("mouseover", (event)=>{ 
-               if( !inPlayerTerritory(event.target.id) ) 
-                  event.target.classList.add("grow"); 
-                else    
-                    return; //do nothing if it is in the player territory. 
-
-                //the value of the possible selection by number
-                const highlightColor = event.target.getAttribute("value");
-
-                //limits the highlight only to elements of the same value (the value is added as class "c${highlightColor}")
-                let highlightedTiles=document.getElementsByClassName(`c${highlightColor}`);
-                
-                //test each of these tiles and only add the class "highlight" to those directly adjacent to a player tile - player tiles are stored by coordinates in an integer array playerTerritory[] (it is an array of tiles but stored as points [1,0] of coordinates.)
-                for (const t of highlightedTiles) {
-                        
-                    //TODO: test if(adjacentToPlayerTerritory(t.id) )
-                        t.classList.add("highlight");
-                        /*TODO: test all neighbours for same value (if it matches the current tile, do this function for that tile too) recursively, skip player territory*/    
-
-                }
-            });
+            tile.addEventListener("mouseover", highlightPotentialGain);
             tile.addEventListener("click", (event)=>{
 
                 ///TODO PLAY SQUISH SOUND
 
                 const play = event.target.getAttribute("value");
-
-                //this only gets one element...?
-                const highlightedTiles=document.getElementsByClassName("highlight");
-          
-                for (const t of highlightedTiles) {
-                    //console.log(t);
-                    //if(adjacentToPlayerTerritory(t.id)){ //already tested and highligted, because they are...
-                        let x=Number(t.id.substring(4, t.id.indexOf('-')));
-                        let y=Number(t.id.substring(t.id.indexOf('-')+1)); 
-                        let point =[x,y];
-                        addToTerritory(point);
-                        t.classList.remove("grow");
-                        t.classList.remove("highlight");
-                    //}
-                    //t.setAttribute("style","Filter: Glow(Color=#00FF00, Strength=20)");
-                }
-                //updateScreen();
-
-                updateTerritoryColor(play);
-
-
-                //event.toElement
+                playValue(play); 
             });
             tile.addEventListener("mouseleave", (event)=>{
                 //console.log(event.target);
                 event.target.classList.remove("grow"); 
                 const highlightColor = event.target.getAttribute("value");
                 //console.log(event.target.getAttribute("value"));
-                const highlightedTiles=document.getElementsByClassName(`c${grid[x][y]}`);
+                const highlightedTiles=document.getElementsByClassName("highlight");
                 for (const t of highlightedTiles) {
                     t.classList.remove("highlight");
                    // t.setAttribute("style","");
@@ -375,10 +457,7 @@ function updateToScreen(grid)
                 //event.toElement
             });
             row.appendChild(tile);
-       
         }
-        
-       
         game.appendChild(row);
     }
 }
