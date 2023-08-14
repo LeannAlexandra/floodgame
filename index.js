@@ -9,34 +9,15 @@ const dev=true;
   let startingPosition =[0,0];
 
 //private: 
-let grid=[[]];
+let grid=[];
 let colors=[{}];
-let playerTerritory=[[]];//a list of tiles in the unified region
+let playerTerritory=[];//use player territory for testing and recursions. 
+let base=[];// use base for painting
 
 createColors(depth);
 createGame(0);//time seed in the future - so that every refresh of the page make a new version.
 updateToScreen(grid);
 addToTerritory(startingPosition, grid[ startingPosition[0] ][ startingPosition[1] ] );
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 function play(value){
     //upate territory to new value
@@ -215,24 +196,19 @@ function west(tileID){
     return `tile${x}-${y}`;
 }
 function northTile(tileID){
-    const x=Number(tileID.substring(4, tileID.indexOf('-')));
-    let y=Number(tileID.substring(tileID.indexOf('-')+1)) -1;
-    return document.getElementById(`tile${x}-${y}`);
+    return document.getElementById(north(tileID));
 }
 function eastTile(tileID){
-    let x=Number(tileID.substring(4, tileID.indexOf('-'))) +1;
-    const y=Number(tileID.substring(tileID.indexOf('-')+1));
-return document.getElementById(`tile${x}-${y}`);
+    return document.getElementById(east(tileID));
 }
 function southTile(tileID){
-    const x=Number(tileID.substring(4, tileID.indexOf('-')));
-    let y=Number(tileID.substring(tileID.indexOf('-')+1)) +1;
-return document.getElementById(`tile${x}-${y}`);
+    return document.getElementById(south(tileID));
 }
 function westTile(tileID){
-    let x=Number(tileID.substring(4, tileID.indexOf('-')))-1;
-    const y=Number(tileID.substring(tileID.indexOf('-')+1));
-    return document.getElementById(`tile${x}-${y}`);
+    return document.getElementById(west(tileID));
+}
+function tile(tileID){
+    return document.getElementById(tileID);
 }
 
 function adjacentToPlayerTerritory(tileID){
@@ -270,10 +246,10 @@ function adjacentToPlayerTerritory(tileID){
 
 function createGame(seed =1)
 {
-    playerTerritory=[];
-    //playerTerritory[0]=[startingPosition];
+    /* update settings from ui*/
 
-    //let consolePreview="";
+    //then create grid/
+    playerTerritory=[];
     for (let y=0;y<height;y++){
         let values={};
         for(let x= 0;x<width;x++){
@@ -284,26 +260,14 @@ function createGame(seed =1)
         //consolePreview+="\n"
     }
 }
-function createColors(depth=4,colorLimitPerSaturation=7,saturation="50%",lightness="50%"){
+function createColors(depth=4,saturation="50%",lightness="50%"){
     const interval=360/depth; 
-   // if (depth<=colorLimitPerSaturation){
-        for(let i =0; i<depth;i++)
+    for(let i =0; i<depth;i++)
         {
             let degree =i*interval;
-            colors[i]= {degree ,saturation,lightness};   //hsl()
-            //console.log(`COLOR ${i}: HSL(${degree},${saturation},${lightness})`);
+            colors[i]= {degree ,saturation,lightness}; 
+
         }
-    //}
-    //else{
-      /*   let groups=1;
-        while(depth/groups>colorLimitPerSaturation){
-            groups++;
-
-        } */
-        //implement a color scemer
-  //  }
-
-
 }
 function updateTerritoryColor(val){
     const colorNum=Number(val);
@@ -314,7 +278,6 @@ function updateTerritoryColor(val){
        
        //remove current color info
         tile.classList.remove(`c${grid[k[0]][k[1]]}`);
-       
        
        //set new value
         grid[k[0]][k[1]] = colorNum;   
@@ -333,19 +296,16 @@ function updateTerritoryColor(val){
 function updateToScreen(grid)
 {
     game.innerHTML="";//clear the grid.
-
-    for (let y=0;y<height;y++){
+    
+    for (let y=0;y<height;y++){//foreach row...
         const row =document.createElement("div");
         row.id=`row${y}`;
         row.classList.add("row");
         row.classList.add(`row${y}`)
        
         
-        for(let x= 0;x<width;x++){
-           // console.log( ` ${colors[grid[x][y]].degree} `);
-            //console.log( `tile${x}-${y}, \tval: ${grid[x][y]} is: \thsl(${colors[grid[x][y]]},${colors[grid[x][y]]} ,${colors[grid[x][y]]})`); //.assert.apply. ...
-           // row.innerHTML+=`<div id="tile${x}-${y}" class="tile" style="background-color:hsl(${colors[grid[x][y]].degree},${colors[grid[x][y]].saturation} ,${colors[grid[x][y]].lightness});"></div>`;
-            const tile =document.createElement("div");
+        for(let x= 0;x<width;x++){//foreach column (tile in row)
+           const tile =document.createElement("div");
             
             tile.id=`tile${x}-${y}`;
             tile.classList.add("tile");
@@ -353,73 +313,26 @@ function updateToScreen(grid)
             tile.setAttribute("value",grid[x][y]) //a=grid[x][y];
             tile.style.backgroundColor=`hsl(${colors[grid[x][y]].degree},${colors[grid[x][y]].saturation} ,${colors[grid[x][y]].lightness})`;
 
-            tile.addEventListener("mouseover", (event)=>{
-                //console.log(event.target);
-                
+            tile.addEventListener("mouseover", (event)=>{ 
                if( !inPlayerTerritory(event.target.id) ) 
-               {
-                
-                event.target.classList.add("grow"); 
-                //event.target.classList.con
-            
-                 }
+                  event.target.classList.add("grow"); 
+                else    
+                    return; //do nothing if it is in the player territory. 
+
+                //the value of the possible selection by number
                 const highlightColor = event.target.getAttribute("value");
-                //console.log(event.target.getAttribute("value"));
-                let highlightedTiles=document.getElementsByClassName(`c${grid[x][y]}`);
+
+                //limits the highlight only to elements of the same value (the value is added as class "c${highlightColor}")
+                let highlightedTiles=document.getElementsByClassName(`c${highlightColor}`);
                 
-          
+                //test each of these tiles and only add the class "highlight" to those directly adjacent to a player tile - player tiles are stored by coordinates in an integer array playerTerritory[] (it is an array of tiles but stored as points [1,0] of coordinates.)
                 for (const t of highlightedTiles) {
-                    //console.log("SOUTHTILE :" +southTile(t.id));
-                    //test if close so user square
-                   // console.log(`ev.target.id= ${target.event.id}  t.id: ${t.id}`)
-                        if(!inPlayerTerritory(t.id) ){
-                            t.classList.add("highlight");
-
-                           /* if(testNorth(t.id,t.value) && !northTile(t.id).classList.contains("highlight") ){ //this adds the next tile - this should happen recursively.
-                                northTile(t.id).classList.add("highlight"); 
-                            }
-                            if(testEast(t.id,t.value) && !eastTile(t.id).classList.contains("highlight")){ //this adds the next tile - this should happen recursively.
-                                eastTile(t.id).classList.add("highlight"); 
-                            }
-        
-                            if(testSouth(t.id,t.value) && !southTile(t.id).classList.contains("highlight")){ //this adds the next tile - this should happen recursively.
-                                southTile(t.id).classList.add("highlight"); 
-                            }
-        
-                            if(testWest(t.id,t.value) && !westTile(t.id).classList.contains("highlight")){ //this adds the next tile - this should happen recursively.
-                                westTile(t.id).classList.add("highlight"); 
-                            }*/
-///TODO: ---------------                        //add neighbors of same coloretc.
-                       // if ()
-                    }
-                    //t.setAttribute("style","Filter: Glow(Color=#00FF00, Strength=20)");
-                }
-                // classList.c
-                highlightedTiles=document.getElementsByClassName("highlight");
-                //console.log("TILE t of Hightlighted Tiles: "+highlightedTiles);
-                for (const t of highlightedTiles) {
-                    //add highlight class to group
-                   // console.log("TILE t of Hightlighted "+t);
-
-                    if(testNorth(t.id,t.value) && !northTile(t.id).classList.contains("highlight") ){ //this adds the next tile - this should happen recursively.
-                        northTile(t.id).classList.add("highlight"); 
-                    }
-
-                    if(testEast(t.id,t.value) && !eastTile(t.id).classList.contains("highlight")){ //this adds the next tile - this should happen recursively.
-                        eastTile(t.id).classList.add("highlight"); 
-                    }
-
-                    if(testSouth(t.id,t.value) && !southTile(t.id).classList.contains("highlight")){ //this adds the next tile - this should happen recursively.
-                        southTile(t.id).classList.add("highlight"); 
-                    }
-
-                    if(testWest(t.id,t.value) && !westTile(t.id).classList.contains("highlight")){ //this adds the next tile - this should happen recursively.
-                        westTile(t.id).classList.add("highlight"); 
-                    }
+                        
+                    //TODO: test if(adjacentToPlayerTerritory(t.id) )
+                        t.classList.add("highlight");
+                        /*TODO: test all neighbours for same value (if it matches the current tile, do this function for that tile too) recursively, skip player territory*/    
 
                 }
-
-                //event.toElement
             });
             tile.addEventListener("click", (event)=>{
 
@@ -428,8 +341,7 @@ function updateToScreen(grid)
                 const play = event.target.getAttribute("value");
 
                 //this only gets one element...?
-                const highlightedTiles=document.getElementsByClassName(`highlight`);
-                //console.log(highlightedTiles);
+                const highlightedTiles=document.getElementsByClassName("highlight");
           
                 for (const t of highlightedTiles) {
                     //console.log(t);
@@ -438,6 +350,7 @@ function updateToScreen(grid)
                         let y=Number(t.id.substring(t.id.indexOf('-')+1)); 
                         let point =[x,y];
                         addToTerritory(point);
+                        t.classList.remove("grow");
                         t.classList.remove("highlight");
                     //}
                     //t.setAttribute("style","Filter: Glow(Color=#00FF00, Strength=20)");
