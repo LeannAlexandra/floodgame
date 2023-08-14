@@ -356,7 +356,7 @@ function updateToScreen(grid)
             tile.addEventListener("mouseover", (event)=>{
                 //console.log(event.target);
                 
-               if(adjacentToPlayerTerritory(event.target.id)&& !inPlayerTerritory(event.target.id) ) 
+               if( !inPlayerTerritory(event.target.id) ) 
                {
                 
                 event.target.classList.add("grow"); 
@@ -372,10 +372,10 @@ function updateToScreen(grid)
                     //console.log("SOUTHTILE :" +southTile(t.id));
                     //test if close so user square
                    // console.log(`ev.target.id= ${target.event.id}  t.id: ${t.id}`)
-                        if(adjacentToPlayerTerritory(t.id) && !inPlayerTerritory(t.id) ){
+                        if(!inPlayerTerritory(t.id) ){
                             t.classList.add("highlight");
 
-                            if(testNorth(t.id,t.value) && !northTile(t.id).classList.contains("highlight") ){ //this adds the next tile - this should happen recursively.
+                           /* if(testNorth(t.id,t.value) && !northTile(t.id).classList.contains("highlight") ){ //this adds the next tile - this should happen recursively.
                                 northTile(t.id).classList.add("highlight"); 
                             }
                             if(testEast(t.id,t.value) && !eastTile(t.id).classList.contains("highlight")){ //this adds the next tile - this should happen recursively.
@@ -388,7 +388,7 @@ function updateToScreen(grid)
         
                             if(testWest(t.id,t.value) && !westTile(t.id).classList.contains("highlight")){ //this adds the next tile - this should happen recursively.
                                 westTile(t.id).classList.add("highlight"); 
-                            }
+                            }*/
 ///TODO: ---------------                        //add neighbors of same coloretc.
                        // if ()
                     }
