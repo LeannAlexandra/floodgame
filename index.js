@@ -53,28 +53,31 @@ function consoleGrid(){
 function playValue(value){
 
     value=Number(value);
-    if (!value){
-       /////////---> debug showWinAnimation();
-        return;
-    }
+    //consoleLog(value);
     stepCount++;
      console.log("THE PLAY VALUE FOR STEP "+stepCount+" is: "+ value);
     
-    
+     //set all base tiles (and frame)
     document.documentElement.style.setProperty('--clr-base', colors[value]);
+
+
     if(!base){
+        console.log(`resetting base?`);
         addToTerritory([startingPosition[0],startingPosition[1]])
     }
-
+    console.log(`currently our base are belong to us ${base}`); //this is our problem - base...
+    let totalBaseSize=0;
     for (const k of base) {
-        //console.log('base: '+ k +`it illiterally is: ${k[0]}-${k[1]} `);
+        totalBaseSize+=1; //on second thought base.length would work fine...
         const tile =document.getElementById(`tile${k[0]}-${k[1]}`);
-        //console.log(`CONST TILE =: ${tile} `);
-       
-       // console.log(`removed the old c value class of `);
-        grid[k[0]][k[1]] = value;   
-        tile.classList.add(`base`);
-        tile.setAttribute("value",value) //a=grid[x][y];
+        if(!tile)
+     {  //tile doesnt exist, remove from list
+        console.log(`CHECK YOUR ADDING ALGORITHM, YOU ADDED tile${k[0]}-${k[1]} somewhere`);
+        base.splice(base.indexOf(k));
+        playerTerritory.splice(playerTerritory.indexOf(k))     
+        continue;
+    }
+        grid[k[0]][k[1]]=value;
         setTimeout(()=>{
             tile.style.backgroundColor=colors[value];
         },uiStepDelay*(k[0]+k[1]));
@@ -82,18 +85,24 @@ function playValue(value){
     }
     for (const k of playerTerritory)
     {
-        console.log(`k of playerterritory: ${k} illiterary values are: ${k[0]},${k[1]}`);
-        console.log(`test South: ${testSouth(id(k),grid[k[0]][k[1]])} && southTile(id(k)).classList.contains("base")? ${southTile(id(k)).classList.contains("base")} `);
-        if(testNorth(id(k)) && !northTile(id(k)).classList.contains("base")){
+        
+        console.log(`k of playerterritory: ${k} illiterary values are: ${k[0]}:${k[1]} && ID: ${id(k)}`);
+
+        if( !inPlayerTerritory(north(k))  &&testNorth(id(k),value) ){
+
+            console.log(`adding North: val: ${grid[k[0],k[1]-1]}   to the territory.`);
             addToTerritory(  [k[0],k[1]-1]   );
         }
-        if( testEast(id(k)) && !eastTile(id(k)).classList.contains("base")){
+        if( !inPlayerTerritory(east(k)) && testEast(id(k),value )){
+            console.log(`adding e: val: ${grid[k[0]+1,k[1]]}   to the territory.`);
             addToTerritory([k[0]+1,k[1]]);
         }
-        if(  testSouth(id(k)) && !southTile(id(k)).classList.contains("base") ){
+        if(  !inPlayerTerritory(south(k))&& testSouth(id(k),value)){
+            console.log(`adding s: val: ${grid[k[0],k[1]+1]}   to the territory.`);
             addToTerritory([k[0],k[1]+1]);
         }
-        if( testWest(id(k)) && !westTile(id(k)).classList.contains("base")){
+        if(  !inPlayerTerritory(west(k)) && testWest(id(k),value)){
+            console.log(`adding w: val: ${grid[k[0]-1,k[1]]}   to the territory.`);
             addToTerritory([k[0]-1,k[1]]);
         }
         
@@ -125,11 +134,14 @@ function showWinAnimation()
                     if(c==depth){
                         setTimeout(()=>{
                             tile.style.backgroundColor=`${colors[grid[x][y]]}`; //the new grid value (Math.floor(Math.random()*depth)+1)
+                            document.documentElement.style.setProperty('--clr-base', colors[(grid[startingPosition[0]][startingPosition[1]])]);
                         }, uiStepDelay*(uiStepDelay/depth)*c);
                         break;
                     } 
                     setTimeout(()=>{
                         tile.style.backgroundColor=`${colors[c]}`;
+                        if(point(tile.id)[0]+point(tile.id)[1] == startingPosition[0]+startingPosition[1])
+                            document.documentElement.style.setProperty('--clr-base', colors[ c ]);
                     }, uiStepDelay*(uiStepDelay/depth)*c);
          
                 } //
@@ -137,16 +149,26 @@ function showWinAnimation()
         }     
     }
 }
-function addToTerritory(coordinates=startingPosition, colorVal = grid[ startingPosition[0] ][ startingPosition[1] ]   )
+function addToTerritory(coordinates=startingPosition)
 {
     let x=coordinates[0];
     let y=coordinates[1];
 
+    if(grid.includes([x,y]))
+        return; //dont add it again.
+
+    console.log(`adding ${x}:${y} to base.`);
     playerTerritory.push(coordinates);
     base.push(coordinates);
 
-    tile(id(coordinates)).classList.remove(`c${grid[k[0]][k[1]]}`);
-    tile(id(coordinates)).classList.add("base");
+    const t =tile(id(coordinates))
+    if(t){
+        t.classList.remove(`c${grid[ x][y]}`);
+        t.classList.add("base");
+        //tile(id(coordinates)).setAttribute("value",value) //a=grid[x][y];
+        //grid[x][y] = value;   
+    }//tile.classList.add(`base`);
+    
 }
 function assessTerritory(){
     for (const k of playerTerritory){
@@ -159,21 +181,17 @@ function assessTerritory(){
                 }   
     }   
 }
-function inPlayerTerritory(tileID)
+function inPlayerTerritory(coordinates)
 {
-    const x=Number(tileID.substring(4, tileID.indexOf('-')));
-    const y=Number(tileID.substring(tileID.indexOf('-')+1)); 
-    for (const point of base) {
-        if(point[0]===x &&point[1]===y)
-            return true;
-    }
-    return false;
+    console.log(`is ${coordinates[0]}:${coordinates[1]} in base? ${base.includes(coordinates)}`);
+
+    return base.includes(coordinates);
 }
 //function devTerritory(){}
 function id(point){
     return `tile${point[0]}-${point[1]}`
 }
-function point(id){
+function point(tileID){
     return [Number(tileID.substring(4, tileID.indexOf('-'))),Number(tileID.substring(tileID.indexOf('-')))];
 }
 function testNorth(tileID, value=grid[startingPosition[0],startingPosition[1]]){
@@ -207,7 +225,7 @@ function testNorth(tileID, value=grid[startingPosition[0],startingPosition[1]]){
 function testEast(tileID, value=grid[startingPosition[0],startingPosition[1]]){
     let x=Number(tileID.substring(4, tileID.indexOf('-')));
     const y=Number(tileID.substring(tileID.indexOf('-')+1)); 
-    
+    value=Number(value);
     //console.log (`TileBeingTested: \t${x}\t${y}: with ints because ${x+y}` );
     if(x+1>=width)
         return false;//out of bounds.
@@ -231,30 +249,20 @@ function testEast(tileID, value=grid[startingPosition[0],startingPosition[1]]){
 function testSouth(tileID, value=grid[startingPosition[0],startingPosition[1]]){
     const x=Number(tileID.substring(4, tileID.indexOf('-')));
     let y=Number(tileID.substring(tileID.indexOf('-')+1)); 
-    
-    //console.log (`TileBeingTested: \t${x}\t${y}: with ints because ${x+y}` );
+    value=Number(value);
+    console.log (`s TileBeingTested: \t${x}\t${y} for value: ${value} : `);
     if(y+1>height)
         return false;//out of bounds.
-
-    //adjust offset
+    console.log (`                                                  ${grid[x][y]===value} `);
     y+=1;
-
-    if(value === playerTerritory){
-        for (const point of value) {
-            if(point[0]===x &&point[1]===y)
-                return true;
-        }
-    }else{
-        //test for the physical value
-        if(grid[x][y]===value)   
+    if(grid[x][y]===value)   
             return true;
-
-    }
     return false;
 }
 function testWest(tileID, value=grid[startingPosition[0],startingPosition[1]]){
     let x=Number(tileID.substring(4, tileID.indexOf('-')));
     const y=Number(tileID.substring(tileID.indexOf('-')+1));   
+    value=Number(value);
     //console.log (`TileBeingTested: \t${x}\t${y}: with ints because ${x+y}` );
     if(x-1<0)
         return false;//out of bounds.
@@ -273,25 +281,25 @@ function testWest(tileID, value=grid[startingPosition[0],startingPosition[1]]){
     }
     return false;
 }
-function north(tileID){
-    const x=Number(tileID.substring(4, tileID.indexOf('-')));
-    let y=Number(tileID.substring(tileID.indexOf('-')+1)) -1;
-    return `tile${x}-${y}`;
+function north(coordinates){
+    const x=coordinates[0];
+    let y=coordinates[1] -1;
+    return [x,y];
 }
-function east(tileID){
-    let x=Number(tileID.substring(4, tileID.indexOf('-'))) +1;
-    const y=Number(tileID.substring(tileID.indexOf('-')+1));
-return `tile${x}-${y}`;
+function east(coordinates){
+    let x=coordinates[0] +1;
+    const y=coordinates[1];
+return [x,y];
 }
-function south(tileID){
-    const x=Number(tileID.substring(4, tileID.indexOf('-')));
-    let y=Number(tileID.substring(tileID.indexOf('-')+1)) +1;
-return `tile${x}-${y}`;
+function south(coordinates){
+    const x=coordinates[0];
+    let y=coordinates[1] +1;
+return [x,y];
 }
-function west(tileID){
-    let x=Number(tileID.substring(4, tileID.indexOf('-')))-1;
-    const y=Number(tileID.substring(tileID.indexOf('-')+1));
-    return `tile${x}-${y}`;
+function west(coordinates){
+    let x=coordinates[0]-1;
+    const y=coordinates[1];
+    return [x,y];
 }
 function northTile(tileID){
     return document.getElementById(north(tileID));
@@ -348,8 +356,8 @@ function createGame(seed =1)
     stepCount=-1;
     playerTerritory=[];
     base =[];
-    //base.push(startingPosition);
-    //playerTerritory.push(startingPosition);
+    base.push(startingPosition);
+    playerTerritory.push(startingPosition);
 
     for (let y=0;y<height;y++){
         let values={};
