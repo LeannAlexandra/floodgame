@@ -37,7 +37,7 @@
 body{
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     text-align: center;
-    /* //overflow: hidden; */
+    overflow-x: hidden; 
     padding:0;
     margin: 0;
 }.highlight{
@@ -57,12 +57,14 @@ body{
     
     border-radius: 3px;
     z-index: 99;
+}#footer{
+    padding: 2vh 0;
 }
 .footer{
     /* background-color: linear-gradient(to bottom, rgba(128, 128, 128, 0.384), white); */
     width: 100%;
-    /* position: fixed;
-    bottom: 0; */
+    position: fixed;
+    bottom: 0;
     text-align: center;
     align-items: center;
     margin: 0 auto;
