@@ -93,6 +93,7 @@ a:hover{
 .row{
     display:block;
     height:var(--var-row-size);
+    max-height: 4vh;
 }
 .tile{
     display:inline;
