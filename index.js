@@ -494,7 +494,7 @@ function updateToScreen(grid)
             tile.addEventListener("click", (event)=>{
 
                 ///TODO PLAY SQUISH SOUND
-
+                event.terget.classList.remove("highlight grow");
                 const play = event.target.getAttribute("value");
                 playValue(play); 
             });
