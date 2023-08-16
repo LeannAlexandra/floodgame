@@ -494,21 +494,21 @@ function updateToScreen(grid)
             tile.addEventListener("click", (event)=>{
 
                 ///TODO PLAY SQUISH SOUND
-                event.terget.classList.remove("highlight grow");
+                event.target.classList.remove("highlight grow");
                 const play = event.target.getAttribute("value");
                 playValue(play); 
-            });
-            tile.addEventListener("mouseleave", (event)=>{
-                ////console.log(event.target);
-                event.target.classList.remove("grow"); 
-                const highlightColor = event.target.getAttribute("value");
-                ////console.log(event.target.getAttribute("value"));
                 const highlightedTiles=document.getElementsByClassName("highlight");
                 for (const t of highlightedTiles) {
                     t.classList.remove("highlight");
-                   // t.setAttribute("style","");
                 }
-                //event.toElement
+            });
+            tile.addEventListener("mouseleave", (event)=>{
+                event.target.classList.remove("grow"); 
+                const highlightColor = event.target.getAttribute("value");
+                const highlightedTiles=document.getElementsByClassName("highlight");
+                for (const t of highlightedTiles) {
+                    t.classList.remove("highlight");
+                }
             });
             row.appendChild(tile);
         }
