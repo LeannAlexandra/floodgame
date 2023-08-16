@@ -10,10 +10,14 @@
 <body>
     <h1>Play Flood Game</h1>
     <p></p>
-    <div class="hidden-controls">
+    <div class="hidden-controls hide">
         <!-- put controls here, that auto hide when not hovered -->
         <form>
-            <input type="range" name="width-range" id="width-range">
+            <label for="width-range">Columns</label><input type="range" min=3 max=24 name="width-range" id="width-range" value="16">
+            <label for="height-range">Rows</label><input type="range" min=3 max=24 name="height-range" id="height-range" value="16">
+            <label for="color-range">Colors</label><input type="range" min=2 max=12 name="color-range" id="color-range" value="5">
+            <p><span id="width-display">16</span><span id="height-display">16</span><span id="color-display">5</span></p>
+            
         </form>
 
 

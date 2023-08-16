@@ -46,14 +46,14 @@ function consoleGrid(){
         for (let x = 0; x < width; x++) {
             line+=`${grid[x][y]}  `;
         }
-        console.log(line);
+        //console.log(line);
     }
-    console.log("\n");
+    //console.log("\n");
 }
 
 
 function playValue(value){
-    console.log(`trying to play: ${value}`)
+    //console.log(`trying to play: ${value}`)
     value=Number(value);
     //consoleLog(value);
     stepCount++;
@@ -61,17 +61,17 @@ function playValue(value){
     // if (functionCount>devLimit)
     //     return;
     
-    //console.log("THE PLAY VALUE FOR STEP "+stepCount+" is: "+ value);
+    ////console.log("THE PLAY VALUE FOR STEP "+stepCount+" is: "+ value);
     
     //set frame * glow color 
     document.documentElement.style.setProperty('--clr-base', colors[value]);
 
 
     if(!base){
-        console.log(`resetting base?`);
+        //console.log(`resetting base?`);
         addToTerritory(startingPosition)
     }
-    console.log(`currently our base are belong to us ${base}`); //this is our problem - base...
+    //console.log(`currently our base are belong to us ${base}`); //this is our problem - base...
     let totalBaseSize=0;
     // paint base 
     for (const k of base) {
@@ -145,7 +145,7 @@ function addToTerritory(coordinates=startingPosition)
     let x=coordinates[0];
     let y=coordinates[1];
 
-    console.log(`adding ${x}:${y} to base.`);
+    //console.log(`adding ${x}:${y} to base.`);
     
     base.push(coordinates);
     playerTerritory.push(coordinates);
@@ -189,19 +189,19 @@ function assessTerritory(){
         //because of this for loop, it will test the new ones also (recursion) without explicit seperate recursion
         if( !inPlayerTerritory([k[0],k[1]-1] )  &&testNorth(k,value) ){
 
-            console.log(`adding North: val: ${grid[k[0]][k[1]-1]}   to the territory.`);
+            //console.log(`adding North: val: ${grid[k[0]][k[1]-1]}   to the territory.`);
             addToTerritory(  [k[0],k[1]-1]   );
         }
         if( !inPlayerTerritory([k[0]+1,k[1]]) && testEast(k,value)){
-            console.log(`adding e: val: ${grid[k[0]+1][k[1]]}   to the territory.`);
+            //console.log(`adding e: val: ${grid[k[0]+1][k[1]]}   to the territory.`);
             addToTerritory([k[0]+1,k[1]]);
         }
         if(  !inPlayerTerritory([k[0],k[1]+1])&& testSouth(k,value)){
-            console.log(`adding s: val: ${grid[k[0]][k[1]+1]}   to the territory.`);
+            //console.log(`adding s: val: ${grid[k[0]][k[1]+1]}   to the territory.`);
             addToTerritory([k[0],k[1]+1]);
         }
         if(  !inPlayerTerritory([k[0]-1,k[1]]) && testWest(k,value)){
-            console.log(`adding w: val: ${grid[k[0]-1][k[1]]}   to the territory.`);
+            //console.log(`adding w: val: ${grid[k[0]-1][k[1]]}   to the territory.`);
             addToTerritory([k[0]-1,k[1]]);
         }      
     }*/
@@ -244,7 +244,7 @@ function testNorth(coordinates, value=grid[startingPosition[0]][startingPosition
     value=Number(value); //force cast to number
     if(!value)
         return false;
-    //console.log (`TileBeingTested: \t${x}\t${y}: with ints because ${x+y}` );
+    ////console.log (`TileBeingTested: \t${x}\t${y}: with ints because ${x+y}` );
     if(y-1<0)
         return false;//out of bounds.
 
@@ -269,7 +269,7 @@ function testEast(coordinates, value=grid[startingPosition[0]][startingPosition[
     let x= coordinates[0]; //Number(tileID.substring(4, tileID.indexOf('-')));
     const y=coordinates[1]; // Number(tileID.substring(tileID.indexOf('-')+1)); 
     value=Number(value);
-    //console.log (`TileBeingTested: \t${x}\t${y}: with ints because ${x+y}` );
+    ////console.log (`TileBeingTested: \t${x}\t${y}: with ints because ${x+y}` );
     if(x+1>=width)
         return false;//out of bounds.
 
@@ -293,11 +293,11 @@ function testSouth(coordinates, value=grid[startingPosition[0]][startingPosition
     const x= coordinates[0]; //Number(tileID.substring(4, tileID.indexOf('-')));
     let y=coordinates[1]; // Number(tileID.substring(tileID.indexOf('-')+1)); 
     value=Number(value);
-    console.log (`s TileBeingTested: \t${x}:${y} for value: ${value} - `);
+    //console.log (`s TileBeingTested: \t${x}:${y} for value: ${value} - `);
     if(y+1>height)
         return false;//out of bounds.
     y+=1;
-    console.log (`               is ${grid[x][y]} equal to ${value}         ${grid[x][y]===value} `);
+    //console.log (`               is ${grid[x][y]} equal to ${value}         ${grid[x][y]===value} `);
     if(grid[x][y]===value)   
             return true;
     return false;
@@ -306,7 +306,7 @@ function testWest(coordinates, value=grid[startingPosition[0]][startingPosition[
     let x= coordinates[0]; //Number(tileID.substring(4, tileID.indexOf('-')));
     const y=coordinates[1]; // Number(tileID.substring(tileID.indexOf('-')+1));   
     value=Number(value);
-    //console.log (`TileBeingTested: \t${x}\t${y}: with ints because ${x+y}` );
+    ////console.log (`TileBeingTested: \t${x}\t${y}: with ints because ${x+y}` );
     if(x-1<0)
         return false;//out of bounds.
     //adjust offset
@@ -499,10 +499,10 @@ function updateToScreen(grid)
                 playValue(play); 
             });
             tile.addEventListener("mouseleave", (event)=>{
-                //console.log(event.target);
+                ////console.log(event.target);
                 event.target.classList.remove("grow"); 
                 const highlightColor = event.target.getAttribute("value");
-                //console.log(event.target.getAttribute("value"));
+                ////console.log(event.target.getAttribute("value"));
                 const highlightedTiles=document.getElementsByClassName("highlight");
                 for (const t of highlightedTiles) {
                     t.classList.remove("highlight");

@@ -5,6 +5,9 @@
     --var-row-size: 45px;
     --var-column-size: 45px;
 }
+.hide{
+    display:none;
+}
 .flood-game-container{
     text-align: center;
     padding: 6vh 0;
