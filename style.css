@@ -4,6 +4,7 @@
     --clr-base: hotpink;
     --var-row-size: 45px;
     --var-column-size: 45px;
+    --var-percentage-limiter:6.25;
 }
 .hide{
     display:none;
@@ -93,7 +94,8 @@ a:hover{
 .row{
     display:block;
     height:var(--var-row-size);
-    max-height: 4vh;
+    max-height: 5vh; 
+    /* //var(--var-percentage-limiter)vh; */
 }
 .tile{
     display:inline;
@@ -101,9 +103,9 @@ a:hover{
     //border-style: solid;
     //border-color: black; */
     width:var(--var-column-size);
-    max-width: 4vw; 
+    max-width: 5.5vw; 
     height:var(--var-row-size);
-    max-height: 4vh;
+    max-height:5vh;
     display: inline-block;
     box-shadow: inset 2px 2px 1px 3px rgba(0, 0, 0, 0.1),inset 0px 0px 1px 1px rgba(0, 0, 0, 0.3); 
     transition: 600ms;
