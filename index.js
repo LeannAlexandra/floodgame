@@ -1,4 +1,4 @@
-const devLimit=1000;// when recursion goes wrong, force stop. 
+//const devLimit=1000;// when recursion goes wrong, force stop. 
 
 const game= document.getElementById("flood-game");
 document.getElementById("date").innerHTML= `&copy ${new Date().getFullYear()}`;
@@ -22,7 +22,7 @@ let depth=7;
 
 let steps=[];
 let stepCount =-1;// the first move is grid initialising the player's base.
-let functionCount=0;
+// let functionCount=0;
 let startingPosition =[0,0];
 
 //private: 
@@ -53,23 +53,23 @@ function consoleGrid(){
 
 
 function playValue(value){
-
+    console.log(`trying to play: ${value}`)
     value=Number(value);
     //consoleLog(value);
     stepCount++;
-    functionCount++;
-    if (functionCount>devLimit)
-        return;
+    // functionCount++;
+    // if (functionCount>devLimit)
+    //     return;
     
-     console.log("THE PLAY VALUE FOR STEP "+stepCount+" is: "+ value);
+    //console.log("THE PLAY VALUE FOR STEP "+stepCount+" is: "+ value);
     
-     //set all base tiles (and frame)
+    //set frame * glow color 
     document.documentElement.style.setProperty('--clr-base', colors[value]);
 
 
     if(!base){
         console.log(`resetting base?`);
-        addToTerritory([startingPosition[0],startingPosition[1]])
+        addToTerritory(startingPosition)
     }
     console.log(`currently our base are belong to us ${base}`); //this is our problem - base...
     let totalBaseSize=0;
@@ -77,64 +77,28 @@ function playValue(value){
     for (const k of base) {
         totalBaseSize+=1; //on second thought base.length would work fine...
         const tile =document.getElementById(`tile${k[0]}-${k[1]}`);
-        if(!tile)
-        {  //tile doesnt exist, remove from list
-        console.log(`CHECK YOUR ADDING ALGORITHM, YOU ADDED tile${k[0]}-${k[1]} somewhere`);
-        base.splice(base.indexOf(k));
-        playerTerritory.splice(playerTerritory.indexOf(k))     
-        continue;
-        }
         grid[k[0]][k[1]]=value;
         setTimeout(()=>{
             tile.style.backgroundColor=colors[value];
         },uiStepDelay*(k[0]+k[1]));
     }
-    expandTerritory(value);
-    assessTerritory();
+    for(const coordinates of playerTerritory){
+        if (!inPlayerTerritory(north(coordinates)) && testNorth(coordinates)) 
+        addToTerritory(north(coordinates));
+    if (!inPlayerTerritory(east(coordinates)) && testEast(coordinates)) 
+        addToTerritory(east(coordinates));
+    if (!inPlayerTerritory(south(coordinates)) && testSouth(coordinates)) 
+        addToTerritory(south(coordinates));
+    if (!inPlayerTerritory(west(coordinates)) && testWest(coordinates)) 
+        addToTerritory(west(coordinates));
+    }
+
+    //addToTerritory(value);
+    if(base.length === width*height){
+        showWinAnimation();
+    }
+    //assessTerritory();
     consoleGrid();
-    
-
-
-    /*let gridSizeOld= base.length;
-    do{
-        gridSizeOld= base.length; // reset test condition
-        */
-    // for (const k of playerTerritory)
-    // {
-        
-    //     console.log(`k of playerterritory: ${k} illiterary values are: ${k[0]}:${k[1]} && ID: ${id(k)}`);
-
-
-    //     // LOGIC ERROR: out of bounds seem like a tile, because we test if it is in the player territory, (false) continues to iterate to testNorth (should be false too)
-    //     if( !inPlayerTerritory([k[0],k[1]-1] )  &&testNorth(k,value) ){
-
-    //         console.log(`adding North: val: ${grid[k[0]][k[1]-1]}   to the territory.`);
-    //         addToTerritory(  [k[0],k[1]-1]   );
-    //         //assessTerritory();
-    //     }
-    //     if( !inPlayerTerritory([k[0]+1,k[1]]) && testEast(k,value)){
-    //         console.log(`adding e: val: ${grid[k[0]+1][k[1]]}   to the territory.`);
-    //         addToTerritory([k[0]+1,k[1]]);
-    //         //assessTerritory();
-    //     }
-    //     if(  !inPlayerTerritory([k[0],k[1]+1])&& testSouth(k,value)){
-    //         console.log(`adding s: val: ${grid[k[0]][k[1]+1]}   to the territory.`);
-    //         addToTerritory([k[0],k[1]+1]);
-    //         //assessTerritory();
-    //     }
-    //     if(  !inPlayerTerritory([k[0]-1,k[1]]) && testWest(k,value)){
-    //         console.log(`adding w: val: ${grid[k[0]-1][k[1]]}   to the territory.`);
-    //         addToTerritory([k[0]-1,k[1]]);
-    //         //assessTerritory();
-    //     }
-             
-    // }
-    //assesWin if base.size() === width*height -> win
-    //else
-    
-    /*} while (base.length>gridSizeOld)
-   //cleanout unnecessary points in the cutting edge, and add new expansion tiles 
-*/ 
 }
 
 
@@ -175,64 +139,47 @@ function showWinAnimation()
 }
 function addToTerritory(coordinates=startingPosition)
 {
-    functionCount++;
-    if (functionCount>devLimit)
-        return;
+    // functionCount++;
+    // if (functionCount>devLimit)
+    //     return;
     let x=coordinates[0];
     let y=coordinates[1];
 
-    /* //the test doesnt work, so cleaned the code resppopnsible for this check in 'inPlayerTerritory' .
-    if(grid.includes([x,y]))
-        return; //dont add it again.
-    */
     console.log(`adding ${x}:${y} to base.`);
     
     base.push(coordinates);
-    console.log(`BASE NOW INCLUDES ${x}:${y}:`);
-    let count=0;
-    for (const k of base){
-        console.log(`basetile ${++count}: ${k[0]}:${k[1]}`);
-    }
-    count=0;
-    console.log(`adding ${x}:${y} to cuttingEdge`);
     playerTerritory.push(coordinates);
-    console.log(`CUTTING EDGE NOW INCLUDES ${x}:${y}:`);
-    for (const k of playerTerritory){
-        console.log(`cuttingEdge ${++count}: ${k[0]}:${k[1]}`);
-    }
-
 
     const t =tile(id(coordinates))
     if(t){
         t.classList.remove(`c${grid[ x][y]}`);
         t.classList.add("base");
-        //tile(id(coordinates)).setAttribute("value",value) //a=grid[x][y];
-        //grid[x][y] = value;   
-    }//tile.classList.add(`base`);
-    value=grid[startingPosition[0]][startingPosition[1]]
-    expandTerritory(value);// u
-    //assessTerritory();
-}
-function expandTerritory(value) {
-    for(const currentCell of playerTerritory){ // Take the first cell in the queue
-        // Check neighboring cells and add to playerTerritory
-        if (!inPlayerTerritory([currentCell[0], currentCell[1] - 1]) && testNorth(currentCell)) {
-            addToTerritory([currentCell[0], currentCell[1] - 1]);
-            //playerTerritory.push([currentCell[0], currentCell[1] - 1]); // Add to queue for next iteration     
-            //base.push([currentCell[0], currentCell[1] - 1]);
-        }if (!inPlayerTerritory([currentCell[0]+1, currentCell[1]]) && testEast(currentCell)) {
-            addToTerritory([currentCell[0]+1, currentCell[1]]);
-            //playerTerritory.push([currentCell[0]+1, currentCell[1]]); // Add to queue for next iteration  
-            //base.push([currentCell[0]+1, currentCell[1]]);   
-        }if (!inPlayerTerritory([currentCell[0], currentCell[1] + 1]) && testSouth(currentCell)) {
-            addToTerritory([currentCell[0], currentCell[1] + 1]);
-            //playerTerritory.push([currentCell[0], currentCell[1]+1]); // Add to queue for next iteration     
-        }if (!inPlayerTerritory([currentCell[0]-1, currentCell[1]]) && testWest(currentCell)) {
-            addToTerritory([currentCell[0]-1, currentCell[1]]);
-            //playerTerritory.push([currentCell[0]-1, currentCell[1]]); // Add to queue for next iteration     
-        }
     }
+    if (!inPlayerTerritory(north(coordinates)) && testNorth(coordinates)) 
+        addToTerritory(north(coordinates));
+    if (!inPlayerTerritory(east(coordinates)) && testEast(coordinates)) 
+        addToTerritory(east(coordinates));
+    if (!inPlayerTerritory(south(coordinates)) && testSouth(coordinates)) 
+        addToTerritory(south(coordinates));
+    if (!inPlayerTerritory(west(coordinates)) && testWest(coordinates)) 
+        addToTerritory(west(coordinates));
+    
+    if( //all neighbors in territory or out of bounds.
+        inPlayerTerritory(north(coordinates)) ||  (north(coordinates))[1]>0    
+        && inPlayerTerritory(east(coordinates))  || (east(coordinates)) [0]<width    
+        && inPlayerTerritory(south(coordinates))  || south(coordinates)[1]<height    
+        && inPlayerTerritory(west(coordinates)) || west(coordinates)[0]>0    
+    ){
+            //clean from cutting edge once here* 
+           for(let point in playerTerritory)
+                if (point[0] === coordinates[0] && point[1] === coordinates[1]) {
+                    playerTerritory.splice(playerTerritory.indexOf(point),1);
+                }
+           // }
+    }
+
 }
+
 function assessTerritory(){
     const value=grid[startingPosition[0]][startingPosition[1]];
 
@@ -273,18 +220,14 @@ function assessTerritory(){
 
 function inPlayerTerritory(coordinates)
 {
-    functionCount++;
-    if (functionCount>devLimit)
-        return;
-    //console.log(`is ${coordinates[0]}:${coordinates[1]} in base? ${base.includes(coordinates)}`);
+    // functionCount++;
+    // if (functionCount>devLimit)
+    //     return;
     for (const point of base) {
         if (point[0] === coordinates[0] && point[1] === coordinates[1]) {
-            console.log(`is ${coordinates[0]}:${coordinates[1]} in base? true`);
             return true;
         }
     }
-
-    //console.log(`is ${coordinates[0]}:${coordinates[1]} in base? false`);
     return false;
 }
 //function devTerritory(){}
