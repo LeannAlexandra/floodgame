@@ -120,10 +120,11 @@ function showWinAnimation()
                 for(let c=0;c<=depth;c++) // C what I did there? ;>
                 {
                     if(c==depth){
-                        setTimeout(()=>{
+                        setTimeout(()=>{ // the last iteration. 
                             tile.style.backgroundColor=`${colors[grid[x][y]]}`; //the new grid value (Math.floor(Math.random()*depth)+1)
                             tile.classList.remove("base");
                             tile.classList.add(`c${grid[x][y]}`)
+                            tile.setAttribute("value",grid[x][y]);
                             document.documentElement.style.setProperty('--clr-base', colors[(grid[startingPosition[0]][startingPosition[1]])]);
                         }, uiStepDelay*(uiStepDelay/depth)*c);
                         break;
