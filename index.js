@@ -55,7 +55,6 @@ function adjustGameSizeOnScreen(ev){
     }
    //the constant 130 ...- it is basically title (fixed 61px + footer fixed 50px = 111 + 4vh (30 px) // suspected never to be the issue anyway .. but here goes...  )
     //smaller= ev.target.innerWidth>ev.target.innerHeight - 141 ? ev.target.innerHeight-131:ev.target.innerWidth;
-   console.log(`small is ${smaller}`);
    //if (smaller==ev.target.innerHeight) { /* the padding in css will take care of this - i hope */}
    let tileSize=smaller/height>smaller/width? `${Math.floor(smaller/width)}px`:`${Math.floor(smaller/height)}px`;
 //    tileSize=tileSize*width>smaller? tileSize-1
