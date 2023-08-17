@@ -1,25 +1,18 @@
-//const devLimit=1000;// when recursion goes wrong, force stop. 
-
+//SET CONSTANTS
+const browser= window;
+const gameContainer=document.getElementsByClassName("flood-game-container")[0];
 const game= document.getElementById("flood-game");
-document.getElementById("date").innerHTML= `&copy ${new Date().getFullYear()}`;
-game.addEventListener('mouseleave', ()=>{
-    const remC1=document.getElementsByClassName("grow");
-    const remC2=document.getElementsByClassName("highlight");
-    for (const t of remC1) { 
-            t.classList.remove("grow");
-     }
-     for (const t of remC2) { 
-        t.classList.remove("highlight");
-    }
-});
 
 
-let width=16;   //if width > height, adds empty rows. 
+//set dynamic date 
+document.getElementById("date").innerHTML= `&copy ${new Date().getFullYear()>2023? "2023 - "+ new Date().getFullYear(): new Date().getFullYear()}`;
+
+//INITIALIZE VARIABLES
+let width=16;   // CURRENT KNOWN LIMITATIONS: - grid must be width==height... ie a square.
+                //if width > height, adds empty rows. 
 let height=16; //if the height is less than width -> problem?
 let depth=7;
 //const dev=true;
-
-
 let steps=[];
 let stepCount =-1;// the first move is grid initialising the player's base.
 // let functionCount=0;
@@ -33,6 +26,62 @@ let base=[];// use base for painting
 const uiStepDelay=50;//milliseconds
 // const totalAnimationTime=2000;/*  */
 
+
+
+// GLOBAL LISTENERS
+browser.addEventListener("resize",adjustGameSizeOnScreen);
+/*(ev)=>{
+    //the constant 130 ...- it is basically title (fixed 61px + footer fixed 50px = 111 + 4vh (30 px) // suspected never to be the issue anyway .. but here goes...  )
+    const smaller= ev.target.innerWidth>ev.target.innerHeight - 141 ? ev.target.innerHeight-131:ev.target.innerWidth;
+    console.log(`small is ${smaller}`);
+    //if (smaller==ev.target.innerHeight) { /* the padding in css will take care of this - i hope *   /}
+    const tileSize=smaller/height>smaller/width? `${Math.floor(maller/width)}px`:`${Math.floor(smaller/height)}px`;
+    document.documentElement.style.setProperty(`--var-row-size`,tileSize );
+    document.documentElement.style.setProperty(`--var-column-size`, tileSize);
+   //this code keeps them square...even on small screens.
+   
+    //we use this to set max -tile size... (to keep them square - ) also we use this to set our color frame gone on mobile.
+    if (smaller<765) //under 820...>remove padding 
+        document.documentElement.style.setProperty(`--var-game-frame-padding`,`0px`);
+    else
+        document.documentElement.style.setProperty(`--var-game-frame-padding`,`6px`);
+});*/
+function adjustGameSizeOnScreen(ev){
+    let smaller=0;
+    if(!ev){
+        smaller= window.innerWidth>window.innerHeight - 141 ? window.innerHeight-131:window.innerWidth;
+    }else{
+        smaller= ev.target.innerWidth>ev.target.innerHeight - 141 ? ev.target.innerHeight-131:ev.target.innerWidth;
+    }
+   //the constant 130 ...- it is basically title (fixed 61px + footer fixed 50px = 111 + 4vh (30 px) // suspected never to be the issue anyway .. but here goes...  )
+    //smaller= ev.target.innerWidth>ev.target.innerHeight - 141 ? ev.target.innerHeight-131:ev.target.innerWidth;
+   console.log(`small is ${smaller}`);
+   //if (smaller==ev.target.innerHeight) { /* the padding in css will take care of this - i hope */}
+   let tileSize=smaller/height>smaller/width? `${Math.floor(smaller/width)}px`:`${Math.floor(smaller/height)}px`;
+//    tileSize=tileSize*width>smaller? tileSize-1
+   document.documentElement.style.setProperty(`--var-row-size`,tileSize );
+   document.documentElement.style.setProperty(`--var-column-size`, tileSize);
+  //this code keeps them square...even on small screens.
+  
+   //we use this to set max -tile size... (to keep them square - ) also we use this to set our color frame gone on mobile.
+   if (smaller<765) //under 820...>remove padding 
+       document.documentElement.style.setProperty(`--var-game-frame-padding`,`0px`);
+   else
+       document.documentElement.style.setProperty(`--var-game-frame-padding`,`6px`);
+
+}
+game.addEventListener('mouseleave', ()=>{
+    const remC1=document.getElementsByClassName("grow");
+    const remC2=document.getElementsByClassName("highlight");
+    for (const t of remC1) { 
+            t.classList.remove("grow");
+     }
+     for (const t of remC2) { 
+        t.classList.remove("highlight");
+    }
+});
+
+adjustGameSizeOnScreen();//upon init morph to screensize.
 createColors(depth);
 createGame(0);//time seed in the future - so that every refresh of the page make a new version.
 consoleGrid();
@@ -106,6 +155,12 @@ function playValue(value){
 function showWinAnimation()
 {   
     /*show everything bla bla:*/
+    ////////SEND PLAY DATA TO SERVER?
+    ////////SAVE USER PROGRESS?
+    ////////UPDATE LEADERBOARD ON SERVER?
+    //increate game number.
+
+    
     createGame();// creates a new grid. 
     for (let y=0;y<height;y++){
         for(let x=0;x<width;x++){
@@ -411,12 +466,13 @@ function createGame(seed =1)
     for (let y=0;y<height;y++){
         let values={};
         for(let x= 0;x<width;x++){
-                values[x]= Math.floor(Math.random(seed++)*1000%depth);
+                values[x]= Math.floor(Math.random(seed)*1000%depth);
       //      consolePreview+=`${values[x]}\t`;
         }
         grid[y]=values;
         
     }
+    seed++;
     
 }
 function createColors(depth=4,saturation=50,lightness=50){

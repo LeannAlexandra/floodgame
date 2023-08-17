@@ -4,22 +4,30 @@
     --clr-base: hotpink;
     --var-row-size: 45px;
     --var-column-size: 45px;
-    --var-percentage-limiter:6.25;
+    --var-percentage-limiter:6.25; 
+    --var-game-frame-padding: 6px;
+    /* 6.25 is default for startup file (works on the default 16x16 grid) */
 }
 .hide{
     display:none;
 }
+h1{
+    padding: 24px 0 0; 
+    margin: 0 auto;
+}
 .flood-game-container{
     text-align: center;
-    padding: 3vh 0 6vh;
+    padding: 1vh 0 3vh;
     width: 100vw;
+    /* max-height: 80vh; */
+    /* // height: 80vh; */
     /* //min-height: 80vh; */
     /* box-shadow: inset 0 0 8px black, 0 0 15px var(--clr-base); */
     
 
 }
 #flood-game{
-    padding: 6px;
+    padding: var(--var-game-frame-padding);
     background-color:var(--clr-base);
     border-width: 1px;
     border-style:  solid;
@@ -28,7 +36,7 @@
     height:50px; */
     width: fit-content;
     height:fit-content;
-    box-shadow: inset 0 0 8px black, 0 0 15px var(--clr-base);
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.473), 0 0 15px var(--clr-base);
     /* width: 480px;
     height:480px; */
     margin: 0 auto;
@@ -40,6 +48,7 @@ body{
     overflow-x: hidden; 
     padding:0;
     margin: 0;
+    height: 100vh;
 }.highlight{
     filter: drop-shadow(0px 0px 1px rgba(255, 255, 255, 1))  brightness(120%); 
     
@@ -96,7 +105,7 @@ a:hover{
 .row{
     display:block;
     height:var(--var-row-size);
-    max-height: 5vh; 
+   /* // max-height: 5vh;  */
     /* //var(--var-percentage-limiter)vh; */
 }
 .tile{
@@ -105,9 +114,9 @@ a:hover{
     //border-style: solid;
     //border-color: black; */
     width:var(--var-column-size);
-    max-width: 5.5vw; 
+    /* max-width: 5.5vw;  */
     height:var(--var-row-size);
-    max-height:5vh;
+    /* max-height:5vh; */
     display: inline-block;
     box-shadow: inset 2px 2px 1px 3px rgba(0, 0, 0, 0.1),inset 0px 0px 1px 1px rgba(0, 0, 0, 0.3); 
     transition: 600ms;
