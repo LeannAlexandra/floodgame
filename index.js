@@ -26,26 +26,41 @@ let base=[];// use base for painting
 const uiStepDelay=50;//milliseconds
 // const totalAnimationTime=2000;/*  */
 
+// Array to store sound file URLs
+var soundFiles = [
+     "sounds/pop1.flac", 
+     "sounds/pop2.wav  ", 
+     "sounds/pop3.wav  ", 
+     "sounds/pop4.wav  ", 
+     "sounds/pop5.mp3  ", 
+     "sounds/pop6.ogg  ", 
+     "sounds/pop7.aiff  ", 
+     "sounds/pop8.wav  ", 
+     "sounds/pop9.wav  ", 
+     "sounds/pop.wav"
+];
+
+var clickAudio = new Audio("sounds/click.wav");
+// Preload audio elements in the background
+var popingsound = soundFiles.map(function(soundUrl) {
+    var audio = new Audio(soundUrl);
+    audio.preload = "auto"; // Preload the audio file
+    return audio;
+});
+
+function clickSound(){
+    clickAudio.play();
+}
+// Function to play a sound by index
+function playSound() {
+    var randomIndex = Math.floor(Math.random() * popingsound.length);
+    popingsound[randomIndex].play();
+}
 
 
 // GLOBAL LISTENERS
 browser.addEventListener("resize",adjustGameSizeOnScreen);
-/*(ev)=>{
-    //the constant 130 ...- it is basically title (fixed 61px + footer fixed 50px = 111 + 4vh (30 px) // suspected never to be the issue anyway .. but here goes...  )
-    const smaller= ev.target.innerWidth>ev.target.innerHeight - 141 ? ev.target.innerHeight-131:ev.target.innerWidth;
-    console.log(`small is ${smaller}`);
-    //if (smaller==ev.target.innerHeight) { /* the padding in css will take care of this - i hope *   /}
-    const tileSize=smaller/height>smaller/width? `${Math.floor(maller/width)}px`:`${Math.floor(smaller/height)}px`;
-    document.documentElement.style.setProperty(`--var-row-size`,tileSize );
-    document.documentElement.style.setProperty(`--var-column-size`, tileSize);
-   //this code keeps them square...even on small screens.
-   
-    //we use this to set max -tile size... (to keep them square - ) also we use this to set our color frame gone on mobile.
-    if (smaller<765) //under 820...>remove padding 
-        document.documentElement.style.setProperty(`--var-game-frame-padding`,`0px`);
-    else
-        document.documentElement.style.setProperty(`--var-game-frame-padding`,`6px`);
-});*/
+
 function adjustGameSizeOnScreen(ev){
     let smaller=0;
     if(!ev){
@@ -105,12 +120,7 @@ function playValue(value){
     value=Number(value);
     //consoleLog(value);
     stepCount++;
-    // functionCount++;
-    // if (functionCount>devLimit)
-    //     return;
-    
-    ////console.log("THE PLAY VALUE FOR STEP "+stepCount+" is: "+ value);
-    
+ 
     //set frame * glow color 
     document.documentElement.style.setProperty('--clr-base', colors[value]);
 
@@ -128,6 +138,7 @@ function playValue(value){
         grid[k[0]][k[1]]=value;
         setTimeout(()=>{
             tile.style.backgroundColor=colors[value];
+            playSound();
         },uiStepDelay*(k[0]+k[1]));
     }
     for(const coordinates of playerTerritory){
@@ -239,30 +250,6 @@ function addToTerritory(coordinates=startingPosition)
 
 function assessTerritory(){
     const value=grid[startingPosition[0]][startingPosition[1]];
-
-    // firstly for each k in player territory 
-    /*for (const k of playerTerritory){ // along the cutting edge
-        //add neigbors of matching value that is not in the base already
-        //because of this for loop, it will test the new ones also (recursion) without explicit seperate recursion
-        if( !inPlayerTerritory([k[0],k[1]-1] )  &&testNorth(k,value) ){
-
-            //console.log(`adding North: val: ${grid[k[0]][k[1]-1]}   to the territory.`);
-            addToTerritory(  [k[0],k[1]-1]   );
-        }
-        if( !inPlayerTerritory([k[0]+1,k[1]]) && testEast(k,value)){
-            //console.log(`adding e: val: ${grid[k[0]+1][k[1]]}   to the territory.`);
-            addToTerritory([k[0]+1,k[1]]);
-        }
-        if(  !inPlayerTerritory([k[0],k[1]+1])&& testSouth(k,value)){
-            //console.log(`adding s: val: ${grid[k[0]][k[1]+1]}   to the territory.`);
-            addToTerritory([k[0],k[1]+1]);
-        }
-        if(  !inPlayerTerritory([k[0]-1,k[1]]) && testWest(k,value)){
-            //console.log(`adding w: val: ${grid[k[0]-1][k[1]]}   to the territory.`);
-            addToTerritory([k[0]-1,k[1]]);
-        }      
-    }*/
-    //then clean the cutting edge. 
 
         for (const k of playerTerritory){
         if(         (testNorth(k, grid[k[0]][k[1]]) || k[1]-1<0)   
@@ -417,42 +404,6 @@ function tile(tileID){
     return document.getElementById(tileID);
 }
 
-// function adjacentToPlayerTerritory(tileID){
-//     functionCount++;
-//     if (functionCount>devLimit)
-//         return;
-//     if(testNorth(tileID, playerTerritory))
-//     {
-//         /* add likemindeds
-
-//         */
-//          return true;
-    
-//     }
-//     /* else if(testNorth(tileID, Number(document.getElementById(tileID).getAttribute("value"))))
-//     return adjacentToPlayerTerritory(north(tileID)) */
-
-
-//     if(testEast(tileID, playerTerritory))
-//          return true;
-//        /*   else if(testEast(tileID, Number(document.getElementById(tileID).getAttribute("value"))))
-//          return adjacentToPlayerTerritory(east(tileID))
-//   */
-   
-//          if(testSouth(tileID, playerTerritory))
-//          return true;
-//      /*     else if(testSouth(tileID, Number(document.getElementById(tileID).getAttribute("value"))))
-//          return adjacentToPlayerTerritory(south(tileID))
-//      */
-   
-//          if(testWest(tileID, playerTerritory))
-//          return true;
-//   /*        else if(testWest(tileID, Number(document.getElementById(tileID).getAttribute("value"))))
-//             return adjacentToPlayerTerritory(west(tileID))
-//   */
-//          return false;
-// }
-
 function createGame(seed =1)
 {
     steps=[];
@@ -551,6 +502,7 @@ function updateToScreen(grid)
             tile.addEventListener("mouseover", highlightPotentialGain);
             tile.addEventListener("click", (event)=>{
 
+                clickSound();
                 ///TODO PLAY SQUISH SOUND
                 event.target.classList.remove("highlight");
                 event.target.classList.remove("grow");
